@@ -27,6 +27,10 @@ app.get('/', (req, res) => {
 
 // Function to generate SRT subtitles from transcription
 function generateSRT(transcription, duration) {
+    if (!transcription) {
+        return ''; // Return empty string if transcription is empty
+    }
+
     const lines = transcription.split('\n');
     let srtContent = '';
     let startTime = 0;
@@ -51,6 +55,7 @@ function generateSRT(transcription, duration) {
 
     return srtContent;
 }
+
 
 // Endpoint to upload video, extract audio, transcribe audio, and generate SRT
 app.post('/upload', upload.single('video'), async (req, res) => {
@@ -172,7 +177,13 @@ app.get('/download-srt/:fileName', (req, res) => {
     });
 });
 
-// Start the server
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
-});
+// Export the app and the generateSRT function for testing
+module.exports = { app, generateSRT };
+
+
+// Start the server only if this is not in a test environment
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(port, () => {
+        console.log(`Server running at http://localhost:${port}`);
+    });
+}
